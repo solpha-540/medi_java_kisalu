@@ -4,6 +4,8 @@ import com.kisalu.gestion.drh.common.dto.ApiResponse;
 import com.kisalu.gestion.drh.common.security.RequiresAuth;
 import com.kisalu.gestion.drh.common.web.AuthContext;
 import com.kisalu.gestion.drh.service.AutorisationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/autorisation")
 @RequiresAuth
+@Tag(name = "Autorisations")
 public class AutorisationController {
 
     private final AutorisationService autorisationService;
@@ -29,12 +32,14 @@ public class AutorisationController {
     }
 
     @GetMapping({"", "/"})
+    @Operation(summary = "Lister les autorisations", description = "Toutes les autorisations, ou filtrées par `id_op_agent`.")
     public ResponseEntity<ApiResponse<Object>> list(@RequestParam(value = "id_op_agent", required = false) String idOpAgent) {
         Map<String, Object> result = autorisationService.list(idOpAgent, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping("/createAutorisation")
+    @Operation(summary = "Créer une autorisation journalière", description = "Requise avant certaines modifications sensibles (PUT paie, conjoint, formation…). Rôles : admin, dg, drh.")
     public ResponseEntity<ApiResponse<Object>> create(@RequestBody Map<String, String> body) {
         Map<String, Object> result = autorisationService.create(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));

@@ -4,6 +4,8 @@ import com.kisalu.gestion.drh.common.dto.ApiResponse;
 import com.kisalu.gestion.drh.common.security.RequiresAuth;
 import com.kisalu.gestion.drh.common.web.AuthContext;
 import com.kisalu.gestion.drh.service.RegionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/region")
 @RequiresAuth
+@Tag(name = "Régions")
 public class RegionController {
 
     private final RegionService regionService;
@@ -30,12 +33,14 @@ public class RegionController {
     }
 
     @GetMapping({"/province/get", "/province/{action}"})
+    @Operation(summary = "Lister les provinces")
     public ResponseEntity<ApiResponse<Object>> listProvinces(@PathVariable(required = false) String action) {
         Map<String, Object> result = regionService.listProvinces();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping({"/province/create", "/province/{action}"})
+    @Operation(summary = "Créer une province")
     public ResponseEntity<ApiResponse<Object>> createProvince(
             @RequestBody Map<String, String> body,
             @PathVariable(required = false) String action) {
@@ -44,6 +49,7 @@ public class RegionController {
     }
 
     @GetMapping({"/ville/get", "/ville/{action}"})
+    @Operation(summary = "Lister les villes", description = "Filtre optionnel : `id`")
     public ResponseEntity<ApiResponse<Object>> listVilles(
             @RequestParam(required = false) Integer id,
             @PathVariable(required = false) String action) {
@@ -52,6 +58,7 @@ public class RegionController {
     }
 
     @PostMapping({"/ville/create", "/ville/{action}"})
+    @Operation(summary = "Créer une ville")
     public ResponseEntity<ApiResponse<Object>> createVille(
             @RequestBody Map<String, String> body,
             @PathVariable(required = false) String action) {
@@ -60,6 +67,7 @@ public class RegionController {
     }
 
     @GetMapping({"/commune/get", "/commune/{action}"})
+    @Operation(summary = "Lister les communes", description = "Filtre optionnel : `id`")
     public ResponseEntity<ApiResponse<Object>> listCommunes(
             @RequestParam(required = false) Integer id,
             @PathVariable(required = false) String action) {
@@ -68,6 +76,7 @@ public class RegionController {
     }
 
     @PostMapping({"/commune/create", "/commune/{action}"})
+    @Operation(summary = "Créer une commune")
     public ResponseEntity<ApiResponse<Object>> createCommune(
             @RequestBody Map<String, String> body,
             @PathVariable(required = false) String action) {
@@ -76,12 +85,14 @@ public class RegionController {
     }
 
     @GetMapping({"/adresse/get", "/adresse/{action}"})
+    @Operation(summary = "Lister les adresses")
     public ResponseEntity<ApiResponse<Object>> listAddresses(@PathVariable(required = false) String action) {
         Map<String, Object> result = regionService.listAddresses();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping({"/adresse/create", "/adresse/{action}"})
+    @Operation(summary = "Créer une adresse")
     public ResponseEntity<ApiResponse<Object>> createAddress(
             @RequestBody Map<String, String> body,
             @PathVariable(required = false) String action) {

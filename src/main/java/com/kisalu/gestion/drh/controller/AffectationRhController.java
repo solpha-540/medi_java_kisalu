@@ -9,6 +9,8 @@ import com.kisalu.gestion.drh.service.DirectionService;
 import com.kisalu.gestion.drh.service.RfFonctionService;
 import com.kisalu.gestion.drh.service.GradeService;
 import com.kisalu.gestion.drh.service.ServiceRhService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/affectationRh")
 @RequiresAuth
+@Tag(name = "Affectation RH")
 public class AffectationRhController {
 
 
@@ -41,6 +44,7 @@ public class AffectationRhController {
 
     // --- Direction ---
     @GetMapping({"/direction", "/direction/{segment}"})
+    @Operation(summary = "Lister les directions")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> listDirections(@PathVariable(required = false) String segment) {
         List<Map<String, Object>> data = directionService.findAll();
         if (data.isEmpty()) {
@@ -50,6 +54,7 @@ public class AffectationRhController {
     }
 
     @PostMapping({"/direction", "/direction/{segment}"})
+    @Operation(summary = "Créer une direction")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createDirection(
             @RequestBody Map<String, Object> body,
             @PathVariable(required = false) String segment) {
@@ -58,6 +63,7 @@ public class AffectationRhController {
     }
 
     @PutMapping("/direction/{id}")
+    @Operation(summary = "Modifier une direction")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateDirection(
             @PathVariable Integer id,
             @RequestBody Map<String, Object> body) {
@@ -66,6 +72,7 @@ public class AffectationRhController {
     }
 
     @DeleteMapping("/directionDelete")
+    @Operation(summary = "Supprimer une direction", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Map<String, Object>>> deleteDirection(@RequestParam Integer id) {
         Map<String, Object> result = directionService.delete(id, currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), (Map<String, Object>) result.get("data"));
@@ -73,6 +80,7 @@ public class AffectationRhController {
 
     // --- Service RH ---
     @GetMapping({"/service_rh", "/service_rh/{segment}"})
+    @Operation(summary = "Lister les services RH")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> listServices(@PathVariable(required = false) String segment) {
         List<Map<String, Object>> data = serviceRhService.findAll();
         if (data.isEmpty()) {
@@ -82,6 +90,7 @@ public class AffectationRhController {
     }
 
     @PostMapping({"/service_rh", "/service_rh/{segment}"})
+    @Operation(summary = "Créer un service RH")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createService(
             @RequestBody Map<String, Object> body,
             @PathVariable(required = false) String segment) {
@@ -90,6 +99,7 @@ public class AffectationRhController {
     }
 
     @PutMapping({"/service_rh", "/service_rh/{segment}"})
+    @Operation(summary = "Modifier un service RH", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateService(
             @RequestParam Integer id,
             @RequestBody Map<String, Object> body,
@@ -99,6 +109,7 @@ public class AffectationRhController {
     }
 
     @DeleteMapping("/service_rhDelete")
+    @Operation(summary = "Supprimer un service RH", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Map<String, Object>>> deleteService(@RequestParam Integer id) {
         Map<String, Object> result = serviceRhService.delete(id, currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), (Map<String, Object>) result.get("data"));
@@ -106,6 +117,7 @@ public class AffectationRhController {
 
     // --- Affectation hiérarchique ---
     @PostMapping("/direction/affecter-directeur")
+    @Operation(summary = "Affecter un directeur à une direction")
     public ResponseEntity<ApiResponse<Map<String, Object>>> affecterDirecteur(@RequestBody Map<String, Object> body) {
         body.put("type", "direction");
         Map<String, Object> result = serviceRhService.affecterResponsable("direction", body);
@@ -113,6 +125,7 @@ public class AffectationRhController {
     }
 
     @PostMapping("/service/affecter-chef")
+    @Operation(summary = "Affecter un chef de service")
     public ResponseEntity<ApiResponse<Map<String, Object>>> affecterChef(@RequestBody Map<String, Object> body) {
         body.put("type", "service");
         Map<String, Object> result = serviceRhService.affecterResponsable("service", body);
@@ -121,6 +134,7 @@ public class AffectationRhController {
 
     // --- Fonction ---
     @GetMapping({"/fonction", "/fonction/{segment}"})
+    @Operation(summary = "Lister les fonctions")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> listFonctions(@PathVariable(required = false) String segment) {
         List<Map<String, Object>> data = fonctionService.findAll();
         if (data.isEmpty()) {
@@ -130,12 +144,14 @@ public class AffectationRhController {
     }
 
     @PostMapping({"/fonction", "/fonction/{segment}"})
+    @Operation(summary = "Créer une fonction")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createFonction(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = fonctionService.create(body, currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), (Map<String, Object>) result.get("data"));
     }
 
     @PutMapping({"/fonction", "/fonction/{segment}"})
+    @Operation(summary = "Modifier une fonction", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateFonction(
             @RequestParam Integer id,
             @RequestBody Map<String, Object> body) {
@@ -144,6 +160,7 @@ public class AffectationRhController {
     }
 
     @DeleteMapping("/fonctionDelete")
+    @Operation(summary = "Supprimer une fonction", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Map<String, Object>>> deleteFonction(@RequestParam Integer id) {
         Map<String, Object> result = fonctionService.delete(id, currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), (Map<String, Object>) result.get("data"));
@@ -151,6 +168,7 @@ public class AffectationRhController {
 
     // --- Grade ---
     @GetMapping({"/grade", "/grade/{segment}"})
+    @Operation(summary = "Lister les grades")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> listGrades(@PathVariable(required = false) String segment) {
         List<Map<String, Object>> data = gradeService.findAll();
         if (data.isEmpty()) {
@@ -160,12 +178,14 @@ public class AffectationRhController {
     }
 
     @PostMapping({"/grade", "/grade/{segment}"})
+    @Operation(summary = "Créer un grade")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createGrade(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = gradeService.create(body, currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), (Map<String, Object>) result.get("data"));
     }
 
     @PutMapping("/grade/{id}")
+    @Operation(summary = "Modifier un grade")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateGrade(
             @PathVariable Integer id,
             @RequestBody Map<String, Object> body) {
@@ -174,6 +194,7 @@ public class AffectationRhController {
     }
 
     @DeleteMapping("/gradeDelete")
+    @Operation(summary = "Supprimer un grade", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Map<String, Object>>> deleteGrade(@RequestParam Integer id) {
         Map<String, Object> result = gradeService.delete(id, currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), (Map<String, Object>) result.get("data"));

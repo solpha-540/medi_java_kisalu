@@ -3,6 +3,8 @@ package com.kisalu.gestion.drh.controller;
 import com.kisalu.gestion.drh.common.dto.ApiResponse;
 import com.kisalu.gestion.drh.common.security.RequiresAuth;
 import com.kisalu.gestion.drh.service.PrimeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/prime")
 @RequiresAuth
+@Tag(name = "Primes")
 public class PrimeController {
 
     private final PrimeService primeService;
@@ -29,6 +32,7 @@ public class PrimeController {
     }
 
     @PostMapping("/registerPrime")
+    @Operation(summary = "Créer une ou plusieurs primes")
     public ResponseEntity<ApiResponse<Object>> registerPrime(@RequestBody Object body) {
         List<Map<String, Object>> items;
         if (body instanceof List<?> list) {
@@ -47,18 +51,21 @@ public class PrimeController {
     }
 
     @GetMapping({"/ListePrimes", "/Prime"})
+    @Operation(summary = "Lister toutes les primes")
     public ResponseEntity<ApiResponse<Object>> listPrimes() {
         Map<String, Object> result = primeService.listPrimes();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/Prime/{id}"})
+    @Operation(summary = "Détail d'une prime par ID")
     public ResponseEntity<ApiResponse<Object>> getPrime(@PathVariable Integer id) {
         Map<String, Object> result = primeService.getPrimeById(id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PutMapping("/UpdatePrime")
+    @Operation(summary = "Modifier une prime", description = "Paramètre requis : `prime_id`")
     public ResponseEntity<ApiResponse<Object>> updatePrime(
             @RequestParam("prime_id") Integer primeId,
             @RequestBody Map<String, Object> body) {

@@ -1,6 +1,7 @@
 package com.kisalu.gestion.drh.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -12,23 +13,23 @@ import org.springframework.http.ResponseEntity;
  * </pre>
  * Le code HTTP de la reponse = champ {@code code}.
  */
+@Schema(description = "Enveloppe JSON standard (équivalent PHP Router::req_response). Le code HTTP = champ code.")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-
-    /** Code HTTP (200, 201, 400, 401, 403, 404, 500...) */
+    @Schema(description = "Code HTTP (200, 201, 400, 401, 403, 404, 500…)", example = "200")
     private int code;
 
-    /** Message lisible pour le client */
+    @Schema(description = "Message lisible pour le client", example = "Opération réussie")
     private String message;
 
-    /** Donnees metier (liste, objet, null) */
+    @Schema(description = "Données métier (liste, objet ou null)")
     private T data;
 
-    /** Detail de l'erreur (mode DEV : file, line, trace) */
+    @Schema(description = "Détail de l'erreur (mode DEV : file, line, trace)")
     private ApiError error;
 
-    /** Tokens JWT access + refresh (routes auth uniquement) */
+    @Schema(description = "Tokens JWT access + refresh (routes auth uniquement)")
     private TokenPair token;
 
     /** Reponse succes sans token */

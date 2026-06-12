@@ -7,6 +7,8 @@ import com.kisalu.gestion.drh.common.dto.TokenPair;
 import com.kisalu.gestion.drh.common.security.JwtTokenProvider;
 import com.kisalu.gestion.drh.common.security.RequiresAuth;
 import com.kisalu.gestion.drh.service.UserAuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Auth")
 public class AuthController {
 
     private final UserAuthService userAuthService;
@@ -34,12 +37,14 @@ public class AuthController {
     }
 
     @PostMapping("/loginAdmin")
+    @Operation(summary = "Connexion administrateur", description = "Back-office admin (`user_type = A`). Route publique. Retourne profil + tokens JWT.")
     public ResponseEntity<ApiResponse<LoginAdminData>> loginAdmin(@RequestBody Map<String, String> body) {
         AuthLoginResult result = userAuthService.loginAdmin(body);
         return ApiResponse.of(result.code(), result.message(), result.data(), result.token());
     }
 
     @PostMapping("/token/refresh")
+    @Operation(summary = "Renouveler les tokens JWT", description = "Route publique. Header : `Authorizations: tac <refresh_token>` (sub = REFRESH).")
     public ResponseEntity<ApiResponse<Void>> refresh(HttpServletRequest request) {
         String headerToken = tokenProvider.extractTokenFromHeader(request.getHeader("Authorizations"));
         if (headerToken == null) {
@@ -51,6 +56,7 @@ public class AuthController {
 
     @GetMapping("/token/verify")
     @RequiresAuth
+    @Operation(summary = "Vérifier validité du access token", description = "Authentification requise (access token, sub = AUTH).")
     public ResponseEntity<ApiResponse<Map<String, Object>>> verify() {
         return ApiResponse.of(200, "le token est encore valide", Map.of("valid", true));
     }

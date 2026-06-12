@@ -14,6 +14,8 @@ import com.kisalu.gestion.drh.service.AgentRegistrationService;
 import com.kisalu.gestion.drh.service.AgentService;
 import com.kisalu.gestion.drh.service.AgentSpecimenService;
 import com.kisalu.gestion.drh.service.AgentValidationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,6 +40,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/agent")
 @RequiresAuth
+@Tag(name = "Agent", description = """
+        Module principal DRH (~60 routes). Sous-domaines : agents, famille, formations, paie,
+        validations DRH/DG, absences, comptes, dossier RH, affectation, carrière, spécimens.
+        Workflow statuts : 1→aptitude, 2→formation, 3→paie, validationDrh→4, validationDg→5.
+        """)
 public class AgentController {
 
 
@@ -82,12 +89,14 @@ public class AgentController {
     }
 
     @GetMapping({"/ListeAgent", "/ListeAgent/{id}"})
+    @Operation(summary = "Lister ou détail agent")
     public ResponseEntity<ApiResponse<Object>> listAgents(@PathVariable(required = false) Integer id) {
         Map<String, Object> result = agentService.listAgents(id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = {"/registerAgent", ""}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Créer un agent", description = "Multipart + photo (max 1 Mo). Rôles : admin, chef personnel.")
     public ResponseEntity<ApiResponse<Object>> registerAgent(
             @RequestParam String nom,
             @RequestParam("post_nom") String postNom,
@@ -134,12 +143,14 @@ public class AgentController {
     }
 
     @DeleteMapping("/deleteAgent")
+    @Operation(summary = "Supprimer un agent", description = "Rôles : admin, dg, drh. Paramètre : `id`")
     public ResponseEntity<ApiResponse<Void>> deleteAgent(@RequestParam Integer id) {
         Map<String, Object> result = agentRegistrationService.deleteAgent(id, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), null);
     }
 
     @PostMapping(value = "/updateAgent", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Mettre à jour un agent", description = "Multipart, photo optionnelle.")
     public ResponseEntity<ApiResponse<Object>> updateAgent(
             @RequestParam Integer id,
             @RequestParam(required = false) String nom,
@@ -171,12 +182,14 @@ public class AgentController {
     }
 
     @GetMapping("/usersCountByRole")
+    @Operation(summary = "Comptage utilisateurs par rôle")
     public ResponseEntity<ApiResponse<Object>> usersCountByRole() {
         Map<String, Object> result = agentExtendedService.usersCountByRole();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/registerConjoint", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Ajouter un conjoint", description = "Multipart (acte de mariage). Rôles : admin, chef suivi carriere.")
     public ResponseEntity<ApiResponse<Object>> registerConjoint(
             @RequestParam String nom,
             @RequestParam("post_nom") String postNom,
@@ -197,12 +210,14 @@ public class AgentController {
     }
 
     @GetMapping({"/ListeConjoints", "/Conjoint", "/Conjoint/{id}"})
+    @Operation(summary = "Lister ou détail conjoint")
     public ResponseEntity<ApiResponse<Object>> listConjoints(@PathVariable(required = false) Integer id) {
         Map<String, Object> result = agentExtendedService.listConjoints(id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/registerEnfant", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Ajouter un enfant", description = "Multipart (attestation naissance). Rôles : admin, chef suivi carriere.")
     public ResponseEntity<ApiResponse<Object>> registerEnfant(
             @RequestParam String nom,
             @RequestParam String postnom,
@@ -220,12 +235,14 @@ public class AgentController {
     }
 
     @GetMapping({"/ListeEnfants", "/Enfant", "/Enfant/{id}"})
+    @Operation(summary = "Lister ou détail enfant")
     public ResponseEntity<ApiResponse<Object>> listEnfants(@PathVariable(required = false) Integer id) {
         Map<String, Object> result = agentExtendedService.listEnfants(id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/registerFormation", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Créer une formation agent", description = "Multipart. Rôles : admin, chef suivi carriere, chef formation.")
     public ResponseEntity<ApiResponse<Object>> registerFormation(
             @RequestParam("nom_formation") String nomFormation,
             @RequestParam String etablissement,
@@ -250,12 +267,14 @@ public class AgentController {
     }
 
     @GetMapping({"/ListeFormations", "/Formation", "/Formation/{id}"})
+    @Operation(summary = "Lister ou détail formation agent")
     public ResponseEntity<ApiResponse<Object>> listFormations(@PathVariable(required = false) Integer id) {
         Map<String, Object> result = agentExtendedService.listFormations(id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/UpdateConjoint", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Modifier un conjoint", description = "Paramètre : `conjoint_id`. Autorisation journalière requise.")
     public ResponseEntity<ApiResponse<Object>> updateConjoint(
             @RequestParam("conjoint_id") Integer conjointId,
             @RequestParam(required = false) String nom,
@@ -276,12 +295,14 @@ public class AgentController {
     }
 
     @DeleteMapping("/DeleteConjoint")
+    @Operation(summary = "Supprimer un conjoint", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Object>> deleteConjoint(@RequestParam(required = false) Integer id) {
         Map<String, Object> result = agentExtendedService.deleteConjoint(id, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/UpdateEnfant", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Modifier un enfant", description = "Paramètre : `enfant_id`")
     public ResponseEntity<ApiResponse<Object>> updateEnfant(
             @RequestParam("enfant_id") Integer enfantId,
             @RequestParam(required = false) String nom,
@@ -300,12 +321,14 @@ public class AgentController {
     }
 
     @DeleteMapping("/DeleteEnfant")
+    @Operation(summary = "Supprimer un enfant", description = "Paramètre : `id`")
     public ResponseEntity<ApiResponse<Object>> deleteEnfant(@RequestParam(required = false) Integer id) {
         Map<String, Object> result = agentExtendedService.deleteEnfant(id, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/UpdateFormation", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Modifier une formation agent", description = "Paramètre : `formation_id`. Autorisation journalière requise.")
     public ResponseEntity<ApiResponse<Object>> updateFormation(
             @RequestParam("formation_id") Integer formationId,
             @RequestParam(required = false) String nom_formation,
@@ -324,24 +347,28 @@ public class AgentController {
     }
 
     @GetMapping("/formationbystatut")
+    @Operation(summary = "Filtrer formations par statut", description = "Valeurs : active, pending, autorise, rejete")
     public ResponseEntity<ApiResponse<Object>> formationByStatut(@RequestParam(required = false) String statut) {
         Map<String, Object> result = agentExtendedService.listFormationsByStatut(statut);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping("/DecisionFormation")
+    @Operation(summary = "Décision DRH/DG sur formation", description = "Body : id_formation, statut (autorise/rejete), commentaire. Rôles : dg, drh.")
     public ResponseEntity<ApiResponse<Object>> decisionFormation(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = agentExtendedService.decisionFormation(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/specimen", "/specimen/{id}"})
+    @Operation(summary = "Lister ou détail spécimens")
     public ResponseEntity<ApiResponse<Object>> listSpecimens(@PathVariable(required = false) Integer id) {
         Map<String, Object> result = agentSpecimenService.listSpecimens(id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/specimen/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Créer un spécimen", description = "Multipart : libele, id_user_created, photo (max 2 Mo)")
     public ResponseEntity<ApiResponse<Object>> createSpecimen(
             @RequestParam String libele,
             @RequestParam("id_user_created") String idUserCreated,
@@ -351,12 +378,14 @@ public class AgentController {
     }
 
     @PostMapping("/registerSalaire")
+    @Operation(summary = "Enregistrer un salaire", description = "Rôles : admin, chef bureau paie")
     public ResponseEntity<ApiResponse<Object>> registerSalaire(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentPayrollService.registerSalaire(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/ListeSalaires", "/Salaire", "/Salaire/{id}"})
+    @Operation(summary = "Lister salaires")
     public ResponseEntity<ApiResponse<Object>> listSalaires(
             @PathVariable(required = false) Integer id,
             @RequestParam(required = false) Integer agentId) {
@@ -366,12 +395,14 @@ public class AgentController {
     }
 
     @PostMapping("/registerRemuneration")
+    @Operation(summary = "Enregistrer une rémunération", description = "Passe le statut agent à 3 (paie)")
     public ResponseEntity<ApiResponse<Object>> registerRemuneration(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = agentPayrollService.registerRemuneration(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/ListeRemunerations", "/Remuneration", "/Remuneration/{id}"})
+    @Operation(summary = "Lister rémunérations")
     public ResponseEntity<ApiResponse<Object>> listRemunerations(
             @PathVariable(required = false) Integer id,
             @RequestParam(required = false) Integer agentId) {
@@ -381,12 +412,14 @@ public class AgentController {
     }
 
     @PostMapping("/registerSecuriteSocial")
+    @Operation(summary = "Enregistrer sécurité sociale")
     public ResponseEntity<ApiResponse<Object>> registerSecuriteSocial(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentPayrollService.registerSecuriteSocial(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/ListeSecuritesSociales", "/SecuriteSocial", "/SecuriteSocial/{id}"})
+    @Operation(summary = "Lister sécurités sociales")
     public ResponseEntity<ApiResponse<Object>> listSecuriteSocial(
             @PathVariable(required = false) Integer id,
             @RequestParam(required = false) Integer agentId) {
@@ -396,6 +429,7 @@ public class AgentController {
     }
 
     @PutMapping("/UpdateSalaire")
+    @Operation(summary = "Modifier un salaire", description = "Paramètre : `salaire_id`. Autorisation journalière + rôle paie requis.")
     public ResponseEntity<ApiResponse<Object>> updateSalaire(
             @RequestParam("salaire_id") Integer salaireId,
             @RequestBody Map<String, String> body) {
@@ -404,6 +438,7 @@ public class AgentController {
     }
 
     @PutMapping("/UpdateRemuneration")
+    @Operation(summary = "Modifier une rémunération", description = "Paramètre : `remuneration_id`")
     public ResponseEntity<ApiResponse<Object>> updateRemuneration(
             @RequestParam("remuneration_id") Integer remunerationId,
             @RequestBody Map<String, String> body) {
@@ -412,6 +447,7 @@ public class AgentController {
     }
 
     @PutMapping("/UpdateSecuriteSocial")
+    @Operation(summary = "Modifier sécurité sociale", description = "Paramètre : `securite_social_id`")
     public ResponseEntity<ApiResponse<Object>> updateSecuriteSocial(
             @RequestParam("securite_social_id") Integer securiteSocialId,
             @RequestBody Map<String, String> body) {
@@ -420,24 +456,28 @@ public class AgentController {
     }
 
     @DeleteMapping("/SecuriteSocial/delete/{id}")
+    @Operation(summary = "Supprimer sécurité sociale")
     public ResponseEntity<ApiResponse<Void>> deleteSecuriteSocial(@PathVariable Integer id) {
         Map<String, Object> result = agentPayrollService.deleteSecuriteSocial(id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), null);
     }
 
     @PostMapping("/validationDrh")
+    @Operation(summary = "Validation DRH", description = "Body : { \"id_op_agent\": [1, 2, 3] }. Statut 3→4. Rôles : admin, drh.")
     public ResponseEntity<ApiResponse<Object>> validationDrh(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = agentValidationService.validationDrh(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping("/validationDg")
+    @Operation(summary = "Validation DG", description = "Body : { \"id_op_agent\": [1, 2, 3] }. Statut 4→5. Rôles : admin, dg.")
     public ResponseEntity<ApiResponse<Object>> validationDg(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = agentValidationService.validationDg(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/RegisterAbsence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Créer signalement d'absence", description = "Multipart optionnel (justificatif max 1,5 Mo)")
     public ResponseEntity<ApiResponse<Object>> registerAbsence(
             @RequestParam String agent_id,
             @RequestParam String type_signalement,
@@ -468,12 +508,14 @@ public class AgentController {
     }
 
     @GetMapping("/GetAllAbsences")
+    @Operation(summary = "Toutes les absences", description = "Jointures service/direction")
     public ResponseEntity<ApiResponse<Object>> getAllAbsences() {
         Map<String, Object> result = agentAbsenceService.getAllAbsences();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/GetAbsenceByAgent", "/GetAbsenceByAgent/{id}"})
+    @Operation(summary = "Absences par agent")
     public ResponseEntity<ApiResponse<Object>> getAbsenceByAgent(
             @PathVariable(required = false) Integer id,
             @RequestParam(required = false) Integer agent_id) {
@@ -483,12 +525,14 @@ public class AgentController {
     }
 
     @GetMapping("/GetAbsenceByService")
+    @Operation(summary = "Absences par service", description = "Paramètre : `service_id`")
     public ResponseEntity<ApiResponse<Object>> getAbsenceByService(@RequestParam Integer service_id) {
         Map<String, Object> result = agentAbsenceService.getAbsenceByService(service_id);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping("/GetAbsenceByDate")
+    @Operation(summary = "Absences par période", description = "Paramètres : `date_debut`, `date_fin`")
     public ResponseEntity<ApiResponse<Object>> getAbsenceByDate(
             @RequestParam String date_debut,
             @RequestParam String date_fin) {
@@ -497,12 +541,14 @@ public class AgentController {
     }
 
     @PutMapping("/UpdateAbsenceStatus")
+    @Operation(summary = "Mise à jour statut absence seul", description = "JSON uniquement")
     public ResponseEntity<ApiResponse<Object>> updateAbsenceStatus(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentAbsenceService.updateAbsenceStatus(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/UpdateAbsence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Mise à jour complète absence", description = "Multipart")
     public ResponseEntity<ApiResponse<Object>> updateAbsence(
             @RequestParam String id,
             @RequestParam String agent_id,
@@ -533,6 +579,7 @@ public class AgentController {
     }
 
     @GetMapping("/GetAbsenceSignalementById")
+    @Operation(summary = "Absences par créateur", description = "Paramètre : `id_user_created_at`")
     public ResponseEntity<ApiResponse<Object>> getAbsenceSignalementById(
             @RequestParam("id_user_created_at") String idUserCreatedAt) {
         Map<String, Object> result = agentAbsenceService.getAbsenceSignalementById(idUserCreatedAt);
@@ -540,6 +587,7 @@ public class AgentController {
     }
 
     @PutMapping("/UpdateAbsenceSignalement")
+    @Operation(summary = "Validation signalement absence", description = "Paramètre : `absence_signalement_id`. Statut + commentaire.")
     public ResponseEntity<ApiResponse<Object>> updateAbsenceSignalement(
             @RequestParam("absence_signalement_id") Integer signalementId,
             @RequestBody Map<String, String> body) {
@@ -549,42 +597,49 @@ public class AgentController {
     }
 
     @PostMapping("/CreateCompteAgent")
+    @Operation(summary = "Créer compte agent")
     public ResponseEntity<ApiResponse<Object>> createCompteAgent(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentAccountService.createCompteAgent(body);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping("/GetAllCompteAgent")
+    @Operation(summary = "Lister comptes agents")
     public ResponseEntity<ApiResponse<Object>> getAllCompteAgent() {
         Map<String, Object> result = agentAccountService.getAllCompteAgent();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PutMapping("/UpdateCompteAgent")
+    @Operation(summary = "Modifier compte agent")
     public ResponseEntity<ApiResponse<Object>> updateCompteAgent(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentAccountService.updateCompteAgent(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping("/DisableAccount")
+    @Operation(summary = "Désactiver compte agent", description = "Body : { \"id_generate\": \"...\" }")
     public ResponseEntity<ApiResponse<Void>> disableAccount(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentAccountService.disableAccount(body.get("id_generate"));
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), null);
     }
 
     @PostMapping("/EnableAccount")
+    @Operation(summary = "Réactiver compte agent", description = "Body : { \"id_generate\": \"...\" }")
     public ResponseEntity<ApiResponse<Void>> enableAccount(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentAccountService.enableAccount(body.get("id_generate"));
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), null);
     }
 
     @GetMapping("/dossier")
+    @Operation(summary = "Lister dossiers RH")
     public ResponseEntity<ApiResponse<Object>> listDossiers() {
         Map<String, Object> result = agentDossierService.listDossiers();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping(value = "/createDossier", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Créer dossier RH", description = "Multipart : CV + diplômes (max 5 Mo/fichier)")
     public ResponseEntity<ApiResponse<Object>> createDossier(
             @RequestParam("id_op_agent") String idOpAgent,
             @RequestPart(value = "curiculum_vitae", required = false) MultipartFile curiculumVitae,
@@ -597,6 +652,7 @@ public class AgentController {
     }
 
     @PostMapping(value = "/updateDossier", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Mettre à jour dossier RH", description = "Paramètre : `dossier_id`. Multipart.")
     public ResponseEntity<ApiResponse<Object>> updateDossier(
             @RequestParam("dossier_id") Integer dossierId,
             @RequestPart(value = "curiculum_vitae", required = false) MultipartFile curiculumVitae,
@@ -609,24 +665,28 @@ public class AgentController {
     }
 
     @PostMapping("/AssignAgent")
+    @Operation(summary = "Affecter agent", description = "Affecter agent à service/direction")
     public ResponseEntity<ApiResponse<Object>> assignAgent(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = agentAffectationService.assignAgent(body);
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PutMapping("/ReassignAgent")
+    @Operation(summary = "Réaffecter agent")
     public ResponseEntity<ApiResponse<Object>> reassignAgent(@RequestBody Map<String, Object> body) {
         Map<String, Object> result = agentAffectationService.reassignAgent(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @PostMapping("/registerAptitude")
+    @Operation(summary = "Enregistrer aptitude physique", description = "Passe statut agent à 1. Rôles : admin, chef suivi carriere.")
     public ResponseEntity<ApiResponse<Object>> registerAptitude(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentCareerService.registerAptitude(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/ListeAptitudes", "/Aptitude", "/Aptitude/{id}"})
+    @Operation(summary = "Lister aptitudes physiques")
     public ResponseEntity<ApiResponse<Object>> listAptitudes(
             @PathVariable(required = false) Integer id,
             @RequestParam(required = false) Integer agentId) {
@@ -636,6 +696,7 @@ public class AgentController {
     }
 
     @PostMapping("/UpdateAptitude")
+    @Operation(summary = "Modifier aptitude physique", description = "Paramètre : `aptitude_physique_id`")
     public ResponseEntity<ApiResponse<Object>> updateAptitude(
             @RequestParam("aptitude_physique_id") Integer aptitudeId,
             @RequestBody Map<String, String> body) {
@@ -644,12 +705,14 @@ public class AgentController {
     }
 
     @PostMapping("/registerCursus")
+    @Operation(summary = "Enregistrer cursus académique", description = "Rôles : admin, chef suivi carriere.")
     public ResponseEntity<ApiResponse<Object>> registerCursus(@RequestBody Map<String, String> body) {
         Map<String, Object> result = agentCareerService.registerCursus(body, authContext.currentUser());
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/ListeCursus", "/Cursus", "/Cursus/{id}"})
+    @Operation(summary = "Lister cursus académiques")
     public ResponseEntity<ApiResponse<Object>> listCursus(
             @PathVariable(required = false) Integer id,
             @RequestParam(required = false) Integer agentId) {
@@ -659,6 +722,7 @@ public class AgentController {
     }
 
     @PostMapping("/UpdateCursus")
+    @Operation(summary = "Modifier cursus académique", description = "Paramètre : `cursus_academique_id`")
     public ResponseEntity<ApiResponse<Object>> updateCursus(
             @RequestParam("cursus_academique_id") Integer cursusId,
             @RequestBody Map<String, String> body) {
@@ -667,12 +731,14 @@ public class AgentController {
     }
 
     @GetMapping("/Byroles")
+    @Operation(summary = "Agents groupés par rôle", description = "Chauffeur, vérificateur, etc.")
     public ResponseEntity<ApiResponse<Object>> getAgentsByRole() {
         Map<String, Object> result = agentCareerService.getAgentsByRole();
         return ApiResponse.of((int) result.get("code"), (String) result.get("message"), result.get("data"));
     }
 
     @GetMapping({"/historiqueAdresseAgent", "/historiqueAdresseAgent/{id}"})
+    @Operation(summary = "Historique adresses agent", description = "Rôles : admin, chef personnel.")
     public ResponseEntity<ApiResponse<Object>> historiqueAdresseAgent(
             @PathVariable(required = false) Integer id,
             @RequestParam(required = false) Integer id_agent) {
